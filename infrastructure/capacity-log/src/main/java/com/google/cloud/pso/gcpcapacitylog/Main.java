@@ -16,8 +16,10 @@
 
 package com.google.cloud.pso.gcpcapacitylog;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.pso.gcpcapacitylog.initialvminventory.InitialVMInventory;
 import com.google.cloud.pso.gcpcapacitylog.machinetypes.MachineTypes;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -32,7 +34,6 @@ public class Main {
       throws InterruptedException, GeneralSecurityException, IOException {
 
     System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
-
     if (args.length != 4) {
       logger.atInfo().log("Example: java -jar gcpcapacitylog.jar initial-vm-inventory projectid 1234567890 gce_capacity_log");
       logger.atInfo().log("Example: java -jar gcpcapacitylog.jar machine-types projectid 1234567890 gce_capacity_log");
