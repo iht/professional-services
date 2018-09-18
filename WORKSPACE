@@ -12,5 +12,5 @@ pip_import(
    requirements = "//data_analytics/dataflow_python_examples:requirements.txt",
 )
 
-load("@pso_deps//:requirements.bzl", _pub_sub_deps_install = "pip_install")
-_pub_sub_deps_install()
+load("@pso_deps//:requirements.bzl", _pso_deps_install = "pip_install")
+_pso_deps_install()
