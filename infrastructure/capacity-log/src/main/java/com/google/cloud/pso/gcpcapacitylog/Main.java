@@ -35,8 +35,8 @@ public class Main {
 
     System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
     if (args.length != 4) {
-      logger.atInfo().log("Example: java -jar gcpcapacitylog.jar initial-vm-inventory projectid 1234567890 gce_capacity_log");
-      logger.atInfo().log("Example: java -jar gcpcapacitylog.jar machine-types projectid 1234567890 gce_capacity_log");
+      logger.atInfo().log("Example: java -jar gcpcapacitylog.jar initial-vm-inventory <project_id> <org_id> <dataset>");
+      logger.atInfo().log("Example: java -jar gcpcapacitylog.jar machine-types <project_id> <org_id> <dataset>");
       System.exit(-1);
     }
 

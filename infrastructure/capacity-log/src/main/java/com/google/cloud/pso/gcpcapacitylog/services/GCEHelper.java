@@ -22,10 +22,12 @@ import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Instances;
+import com.google.api.services.compute.Compute.MachineTypes.AggregatedList;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.InstanceList;
 import com.google.api.services.compute.model.MachineType;
 import com.google.api.services.compute.model.MachineTypeAggregatedList;
+import com.google.api.services.compute.model.MachineTypeList;
 import com.google.api.services.compute.model.MachineTypesScopedList;
 import com.google.api.services.compute.model.Zone;
 import com.google.common.flogger.FluentLogger;
@@ -59,13 +61,17 @@ public class GCEHelper {
 
     return returnValue;
   }
-
+  private static List<Zone> getZones(Project project) throws GeneralSecurityException, IOException {
+	  Compute compute = ComputeService.getInstance();
+	  return compute.zones().list(project.getProjectId()).execute().getItems();
+  }
   public static List<Instance> getInstancesForProject(Project project)
       throws IOException, GeneralSecurityException {
 
     List<Instance> returnValue = new ArrayList();
+    List<Zone> zones = getZones(project);
     Compute compute = ComputeService.getInstance();
-    List<Zone> zones = compute.zones().list(project.getProjectId()).execute().getItems();
+   
 
     for (Zone zone : zones) {
       Instances.List request = compute.instances().list(project.getProjectId(), zone.getName());
@@ -82,30 +88,30 @@ public class GCEHelper {
   }
 
   public static List<MachineType> getMachineTypesForProject(Project project)
-      throws GeneralSecurityException, IOException {
+		  throws GeneralSecurityException, IOException {
 
-    Compute compute = ComputeService.getInstance();
-    List<MachineType> returnvalue = new ArrayList<>();
-
-    MachineTypeAggregatedList results = null;
-    try {
-      results = compute.machineTypes().aggregatedList(project.getProjectId()).execute();
-    } catch (GoogleJsonResponseException e) {
-      if (e.getStatusCode() == 403) {
-        logger.atInfo().log("GCE API not activated for project: " + project.getProjectId() + ". Ignoring project.");
-      } else {
-        throw e;
-      }
-    }
-
-    if (results != null && results.getItems().values() != null) {
-      for (MachineTypesScopedList machineType : results.getItems().values()) {
-        if (machineType.getMachineTypes() != null) {
-          returnvalue.addAll(machineType.getMachineTypes());
-        }
-      }
-    }
-
-    return returnvalue;
+	  List<MachineType> returnvalue = new ArrayList<>();
+	  try {
+		  List<Zone> zones = getZones(project);
+		  for (Zone zone : zones) {
+			  Compute compute = ComputeService.getInstance();
+			  Compute.MachineTypes.List request = compute.machineTypes().list(project.getProjectId(), zone.getName());
+			  MachineTypeList response = null;
+			  do {
+				  response = request.execute();
+				  if (response != null && response.getItems() != null) {
+					  returnvalue.addAll(response.getItems());
+				  }
+				  request.setPageToken(response.getNextPageToken());
+			  } while (response.getNextPageToken() != null);
+		  }
+	  } catch (GoogleJsonResponseException e) {
+		  if (e.getStatusCode() == 403) {
+			  logger.atInfo().log("GCE API not activated for project: " + project.getProjectId() + ". Ignoring project.");
+		  } else {
+			  throw e;
+		  }
+	  }
+	  return returnvalue;
   }
 }

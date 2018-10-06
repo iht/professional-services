@@ -29,13 +29,6 @@
       }
     },
     {
-      "name": "self_link",
-      "type": {
-        "equivalent": "STRING",
-        "constant": "STRING"
-      }
-    },
-    {
       "name": "memory_mb",
       "type": {
         "equivalent": "INT64",
@@ -57,13 +50,6 @@
       }
     },
     {
-      "name": "zone",
-      "type": {
-        "equivalent": "STRING",
-        "constant": "STRING"
-      }
-    },
-    {
       "name": "creation_timestamp",
       "type": {
         "equivalent": "TIMESTAMP",
@@ -72,13 +58,6 @@
     },
     {
       "name": "name",
-      "type": {
-        "equivalent": "STRING",
-        "constant": "STRING"
-      }
-    },
-    {
-      "name": "project_id",
       "type": {
         "equivalent": "STRING",
         "constant": "STRING"

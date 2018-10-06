@@ -42,49 +42,43 @@ public class MachineTypes {
    * @see MachineTypeRow is the BigQuery datamodel
    */
   public static void writeMachineTypestoBQ(String projectId, String orgNumber, String dataset,
-      String tableName)
-      throws IOException, GeneralSecurityException, InterruptedException {
+		  String tableName)
+				  throws IOException, GeneralSecurityException, InterruptedException {
+	  List<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
+	  HashSet<Object> machineTypeRows = new HashSet<>();
+	  for (int i = 0; i < projects.size(); i++) {
 
-    BQHelper.deleteTable(projectId, dataset, tableName);
+		  Project project = projects.get(i);
 
-    List<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
+		  for (MachineType machineType : GCEHelper.getMachineTypesForProject(project)) {
+			  machineTypeRows.add(convertToBQRow(machineType));
+		  }
+		  logger.atInfo().log(
+				  "got machine types from project (" + (i + 1) + "/" + projects.size() + ") " + projects.get(i)
+				  .getProjectId());
+	  }
 
-    for (int i = 0; i < projects.size(); i++) {
-      Set<Object> machineTypeRows = new HashSet<>();
-      Project project = projects.get(i);
-
-      for (MachineType machineType : GCEHelper.getMachineTypesForProject(project)) {
-        machineTypeRows.add(convertToBQRow(project, machineType));
-      }
-      // Table table = BQHelper.createTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema());
-      JobStatistics statistics = null;
-
-      try {
-        statistics = BQHelper.insertIntoTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema(), machineTypeRows);
-        logger.atInfo().log(statistics.toString());
-      } catch (EmptyRowCollection e) {
-        logger.atFinest().log("No input data supplied", e);
-      }
-
-      logger.atInfo().log(
-          "Processed project (" + (i + 1) + "/" + projects.size() + ") " + projects.get(i)
-              .getProjectId());
-    }
+	  //Save the data in BQ
+	  try {
+		  BQHelper.deleteTable(projectId, dataset, tableName);
+		  JobStatistics statistics = null;
+		  statistics = BQHelper.insertIntoTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema(), machineTypeRows);
+		  logger.atInfo().log(statistics.toString());
+	  } catch (EmptyRowCollection e) {
+		  logger.atFinest().log("No input data supplied", e);
+	  }
   }
 
-  protected static MachineTypeRow convertToBQRow(Project project, MachineType machineType) {
+  protected static MachineTypeRow convertToBQRow(MachineType machineType) {
     return new MachineTypeRow(
         machineType.getIsSharedCpu(),
         machineType.getKind(),
         machineType.getDescription(),
-        machineType.getSelfLink(),
         machineType.getMemoryMb(),
         machineType.getMaximumPersistentDisks(),
         machineType.getMaximumPersistentDisksSizeGb(),
-        machineType.getZone(),
         machineType.getCreationTimestamp(),
         machineType.getName(),
-        project.getProjectId(),
         machineType.getGuestCpus()
     );
   }

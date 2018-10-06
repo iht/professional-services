@@ -36,8 +36,6 @@ public class MachineTypeRow {
   @SerializedName("description")
   String description;
 
-  @SerializedName("self_link")
-  String selfLink;
 
   @SerializedName("memory_mb")
   Integer memoryMb;
@@ -48,35 +46,26 @@ public class MachineTypeRow {
   @SerializedName("max_persistent_disk_size_gb")
   Long maximumPersistentDisksSizeGb;
 
-  @SerializedName("zone")
-  String zone;
-
   @SerializedName("creation_timestamp")
   String creationTimestamp;
 
   @SerializedName("name")
   String name;
 
-  @SerializedName("project_id")
-  String projectID;
 
-
-  public MachineTypeRow(Boolean isSharedCpu, String kind, String description, String selfLink,
+  public MachineTypeRow(Boolean isSharedCpu, String kind, String description, 
       Integer memoryMb, Integer maximumPersistentDisks, Long maximumPersistentDisksSizeGb,
-      String zone, String creationTimestamp, String name, String projectID, Integer guestCpus) {
+      String creationTimestamp, String name, Integer guestCpus) {
 
     this.isSharedCpu = isSharedCpu;
     this.guestCpus = guestCpus;
     this.kind = kind;
     this.description = description;
-    this.selfLink = selfLink;
     this.memoryMb = memoryMb;
     this.maximumPersistentDisks = maximumPersistentDisks;
     this.maximumPersistentDisksSizeGb = maximumPersistentDisksSizeGb;
-    this.zone = zone;
     this.creationTimestamp = creationTimestamp;
     this.name = name;
-    this.projectID = projectID;
   }
 
   // For tests
@@ -95,22 +84,19 @@ public class MachineTypeRow {
         Objects.equals(guestCpus, that.guestCpus) &&
         Objects.equals(kind, that.kind) &&
         Objects.equals(description, that.description) &&
-        Objects.equals(selfLink, that.selfLink) &&
         Objects.equals(memoryMb, that.memoryMb) &&
         Objects.equals(maximumPersistentDisks, that.maximumPersistentDisks) &&
         Objects.equals(maximumPersistentDisksSizeGb, that.maximumPersistentDisksSizeGb) &&
-        Objects.equals(zone, that.zone) &&
         Objects.equals(creationTimestamp, that.creationTimestamp) &&
-        Objects.equals(name, that.name) &&
-        Objects.equals(projectID, that.projectID);
+        Objects.equals(name, that.name);
   }
 
   @Override
   public int hashCode() {
 
     return Objects
-        .hash(isSharedCpu, guestCpus, kind, description, selfLink, memoryMb, maximumPersistentDisks,
-            maximumPersistentDisksSizeGb, zone, creationTimestamp, name, projectID);
+        .hash(isSharedCpu, guestCpus, kind, description, memoryMb, maximumPersistentDisks,
+            maximumPersistentDisksSizeGb, creationTimestamp, name);
   }
   
   public static Schema getBQSchema() {
@@ -118,15 +104,12 @@ public class MachineTypeRow {
 	 Field f2 = Field.of("cpus", LegacySQLTypeName.INTEGER);
 	 Field f3 = Field.of("kind", LegacySQLTypeName.STRING);
 	 Field f4 = Field.of("description", LegacySQLTypeName.STRING);
-	 Field f5 = Field.of("self_link", LegacySQLTypeName.STRING);
-	 Field f6 = Field.of("memory_mb", LegacySQLTypeName.INTEGER);
-	 Field f7 = Field.of("max_persistent_disks", LegacySQLTypeName.INTEGER);
-	 Field f8 = Field.of("max_persistent_disk_size_gb", LegacySQLTypeName.INTEGER);
-	 Field f9 = Field.of("zone", LegacySQLTypeName.STRING);
-	 Field f10 = Field.of("creation_timestamp", LegacySQLTypeName.TIMESTAMP);
-	 Field f11 = Field.of("name", LegacySQLTypeName.STRING);
-	 Field f12 =  Field.of("project_id", LegacySQLTypeName.STRING);
-	 return Schema.of(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12);
+	 Field f5 = Field.of("memory_mb", LegacySQLTypeName.INTEGER);
+	 Field f6 = Field.of("max_persistent_disks", LegacySQLTypeName.INTEGER);
+	 Field f7 = Field.of("max_persistent_disk_size_gb", LegacySQLTypeName.INTEGER);
+	 Field f8 = Field.of("creation_timestamp", LegacySQLTypeName.TIMESTAMP);
+	 Field f9 = Field.of("name", LegacySQLTypeName.STRING);
+	 return Schema.of(f1, f2, f3, f4, f5, f6, f7, f8, f9);
 	
 	
   }

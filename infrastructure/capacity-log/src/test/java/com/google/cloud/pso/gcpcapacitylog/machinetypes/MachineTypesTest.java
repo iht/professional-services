@@ -47,10 +47,8 @@ public class MachineTypesTest {
     machineType.setKind("compute#machineType");
     machineType.setMemoryMb(614);
     machineType.setDescription("1 vCPU (shared physical core) and 0.6 GB RAM");
-    machineType.setSelfLink("https://www.googleapis.com/compute/beta/projects/exampleprojectname/zones/us-central1-a/machineTypes/f1-micro");
     machineType.setMaximumPersistentDisks(16);
     machineType.setMaximumPersistentDisksSizeGb(3072L);
-    machineType.setZone("us-central1-a");
     machineType.setCreationTimestamp("1969-12-31T16:00:00.000-08:00");
     machineType.setName("f1-micro");
 
@@ -61,19 +59,16 @@ public class MachineTypesTest {
     machineTypeRow.kind = "compute#machineType";
     machineTypeRow.memoryMb = 614;
     machineTypeRow.description = "1 vCPU (shared physical core) and 0.6 GB RAM";
-    machineTypeRow.selfLink = "https://www.googleapis.com/compute/beta/projects/exampleprojectname/zones/us-central1-a/machineTypes/f1-micro";
     machineTypeRow.maximumPersistentDisks = 16;
     machineTypeRow.maximumPersistentDisksSizeGb = 3072L;
-    machineTypeRow.zone = "us-central1-a";
     machineTypeRow.creationTimestamp = "1969-12-31T16:00:00.000-08:00";
     machineTypeRow.name = "f1-micro";
-    machineTypeRow.projectID = "exampleprojectname";
 
   }
 
   @Test
   public void convertToBQRowJsonTest() {
-    assertEquals( gson.toJson(machineTypeRow), gson.toJson(convertToBQRow(project,machineType)));
+    assertEquals( gson.toJson(machineTypeRow), gson.toJson(convertToBQRow(machineType)));
   }
 
   @Test
