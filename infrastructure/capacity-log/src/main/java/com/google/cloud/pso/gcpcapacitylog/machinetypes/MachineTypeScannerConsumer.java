@@ -22,14 +22,15 @@ import com.google.cloud.pso.gcpcapacitylog.services.GCEHelper;
 import com.google.common.flogger.FluentLogger;
 import java.util.HashSet;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 public class MachineTypeScannerConsumer implements Runnable {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private Queue<Project> queue;
+  private BlockingQueue<Project> queue;
   private HashSet<Object> machineTypeRows;
 
-  public MachineTypeScannerConsumer(Queue<Project> queue, HashSet<Object> machineTypeRows) {
+  public MachineTypeScannerConsumer(BlockingQueue<Project> queue, HashSet<Object> machineTypeRows) {
     this.queue = queue;
     this.machineTypeRows = machineTypeRows;
   }
@@ -40,7 +41,7 @@ public class MachineTypeScannerConsumer implements Runnable {
     while (!queue.isEmpty()) {
       project = queue.poll();
 
-      logger.atInfo().log("Processing machine types for project: " + project.getProjectId() + ". (" + queue.size() + " project remaining)");
+      logger.atInfo().log("Processing machine types for project: " + project.getProjectId() + ". (" + queue.size() + " projects remaining)");
       try {
         for (MachineType machineType : GCEHelper.getMachineTypesForProject(project)) {
           machineTypeRows.add(convertToBQRow(machineType));

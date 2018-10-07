@@ -35,19 +35,21 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class GCEHelper {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public static List<Project> getProjectsForOrg(String orgNumber)
+  public static BlockingQueue<Project> getProjectsForOrg(String orgNumber)
       throws IOException, GeneralSecurityException {
 
     CloudResourceManager cloudResourceManagerService = CloudResourceManagerService.getInstance();
     CloudResourceManager.Projects.List request = cloudResourceManagerService.projects().list()
         .setFilter("parent.type=organization AND parent.id=" + orgNumber);
     ListProjectsResponse response;
-    List returnValue = new ArrayList();
+    LinkedBlockingQueue returnValue = new LinkedBlockingQueue();
     do {
       response = request.execute();
       if (response.getProjects() == null) {
@@ -107,7 +109,7 @@ public class GCEHelper {
 		  }
 	  } catch (GoogleJsonResponseException e) {
 		  if (e.getStatusCode() == 403) {
-			  logger.atInfo().log("GCE API not activated for project: " + project.getProjectId() + ". Ignoring project.");
+			  logger.atFine().log("GCE API not activated for project: " + project.getProjectId() + ". Ignoring project.");
 		  } else {
 			  throw e;
 		  }

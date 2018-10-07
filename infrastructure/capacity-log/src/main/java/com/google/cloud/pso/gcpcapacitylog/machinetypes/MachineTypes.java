@@ -29,9 +29,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MachineTypes {
@@ -50,7 +52,7 @@ public class MachineTypes {
   public static void writeMachineTypestoBQ(String projectId, String orgNumber, String dataset,
 		  String tableName)
 				  throws IOException, GeneralSecurityException, InterruptedException {
-	  Queue<Project> projects = new ConcurrentLinkedQueue<>(GCEHelper.getProjectsForOrg(orgNumber));
+    BlockingQueue<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
 	  HashSet<Object> machineTypeRows = new HashSet<>();
 
     ExecutorService pool = Executors.newFixedThreadPool(THREAD_COUNT);
@@ -65,6 +67,7 @@ public class MachineTypes {
     //Save the data in BQ
 	  try {
 		  BQHelper.deleteTable(projectId, dataset, tableName);
+      logger.atInfo().log("Writing " + machineTypeRows.size() + " rows to BigQuery");
 		  JobStatistics statistics = BQHelper.insertIntoTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema(), machineTypeRows);
 		  logger.atInfo().log(statistics.toString());
 	  } catch (EmptyRowCollection e) {

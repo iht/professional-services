@@ -16,7 +16,7 @@
 
 package com.google.cloud.pso.gcpcapacitylog.initialvminventory;
 
-import static com.google.cloud.pso.gcpcapacitylog.initialvminventory.InitialVMInventory.convertToBQRow;
+import static com.google.cloud.pso.gcpcapacitylog.initialvminventory.InitialVMInventoryProducer.convertToBQRow;
 import static junit.framework.TestCase.assertEquals;
 
 import com.google.api.services.compute.model.Instance;

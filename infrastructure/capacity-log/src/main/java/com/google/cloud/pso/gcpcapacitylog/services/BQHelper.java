@@ -86,8 +86,7 @@ public class BQHelper {
    * This appends into the BQ table specified in the input argument with the data in the input argument rows. Each object in rows is first converted to json and
    * uploaded to BigQuery.
    *
-   * @param datasetName the name of the dataset where the rows should be written. Example: gce_capacity_log
-   * @param tableName the table name where the rows should be written. Example: machine_types
+   * @param table the table  where the rows should be written. Example: machine_types
    * @param rows the data to be written to BQ
    */
   public static JobStatistics insertIntoTable(Table table, Schema schema, Collection<Object> rows)
