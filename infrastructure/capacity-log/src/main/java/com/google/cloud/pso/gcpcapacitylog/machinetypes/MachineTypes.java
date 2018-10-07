@@ -17,7 +17,6 @@
 package com.google.cloud.pso.gcpcapacitylog.machinetypes;
 
 import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.compute.model.MachineType;
 import com.google.cloud.bigquery.JobStatistics;
 import com.google.cloud.pso.gcpcapacitylog.services.BQHelper;
 import com.google.cloud.pso.gcpcapacitylog.services.EmptyRowCollection;
@@ -25,13 +24,20 @@ import com.google.cloud.pso.gcpcapacitylog.services.GCEHelper;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class MachineTypes {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  private static final int THREAD_COUNT = 10;
 
   /**
    * This method scans a org for MachineTypes and uploads an each machine type to table specificed in the input arguments.
@@ -44,44 +50,28 @@ public class MachineTypes {
   public static void writeMachineTypestoBQ(String projectId, String orgNumber, String dataset,
 		  String tableName)
 				  throws IOException, GeneralSecurityException, InterruptedException {
-	  List<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
+	  Queue<Project> projects = new ConcurrentLinkedQueue<>(GCEHelper.getProjectsForOrg(orgNumber));
 	  HashSet<Object> machineTypeRows = new HashSet<>();
-	  for (int i = 0; i < projects.size(); i++) {
 
-		  Project project = projects.get(i);
+    ExecutorService pool = Executors.newFixedThreadPool(THREAD_COUNT);
+    for(int i = 0; i < THREAD_COUNT; i++) {
+      pool.execute(new MachineTypeScannerConsumer(projects, machineTypeRows));
+    }
 
-		  for (MachineType machineType : GCEHelper.getMachineTypesForProject(project)) {
-			  machineTypeRows.add(convertToBQRow(machineType));
-		  }
-		  logger.atInfo().log(
-				  "got machine types from project (" + (i + 1) + "/" + projects.size() + ") " + projects.get(i)
-				  .getProjectId());
-	  }
+    pool.shutdown();
+    // Wait for 24 hours maximum until forceful termination of thread-pool.
+    pool.awaitTermination(60*24, TimeUnit.MINUTES);
 
-	  //Save the data in BQ
+    //Save the data in BQ
 	  try {
 		  BQHelper.deleteTable(projectId, dataset, tableName);
-		  JobStatistics statistics = null;
-		  statistics = BQHelper.insertIntoTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema(), machineTypeRows);
+		  JobStatistics statistics = BQHelper.insertIntoTable(projectId, dataset, tableName, MachineTypeRow.getBQSchema(), machineTypeRows);
 		  logger.atInfo().log(statistics.toString());
 	  } catch (EmptyRowCollection e) {
 		  logger.atFinest().log("No input data supplied", e);
 	  }
   }
 
-  protected static MachineTypeRow convertToBQRow(MachineType machineType) {
-    return new MachineTypeRow(
-        machineType.getIsSharedCpu(),
-        machineType.getKind(),
-        machineType.getDescription(),
-        machineType.getMemoryMb(),
-        machineType.getMaximumPersistentDisks(),
-        machineType.getMaximumPersistentDisksSizeGb(),
-        machineType.getCreationTimestamp(),
-        machineType.getName(),
-        machineType.getGuestCpus()
-    );
-  }
 
 
 }

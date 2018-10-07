@@ -16,7 +16,7 @@
 
 package com.google.cloud.pso.gcpcapacitylog.machinetypes;
 
-import static com.google.cloud.pso.gcpcapacitylog.machinetypes.MachineTypes.convertToBQRow;
+import static com.google.cloud.pso.gcpcapacitylog.machinetypes.MachineTypeScannerConsumer.convertToBQRow;
 import static junit.framework.TestCase.assertEquals;
 
 import com.google.gson.Gson;
