@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class InitialVMInventory {
 
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-  private static final int THREAD_COUNT = 1;
+  private static final int THREAD_COUNT = 10;
 
   /**
    * This method scans a org for VMs and uploads an inventory of the current VMs for the table specificed in the input arguments.
@@ -53,6 +53,8 @@ public class InitialVMInventory {
     BlockingQueue<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
     BlockingQueue<Object> initialVMInventoryQueue = new LinkedBlockingDeque<>();
 
+    // Run THREAD_COUNT number of threads (producers) that traverse the org by popping one project from the queue and find all currently running VMs for that project
+    // Each time the producer finds a VM it adds it to the output queue (initialVMInventoryQueue).
     ExecutorService pool = Executors.newFixedThreadPool(THREAD_COUNT);
     for (int i = 0; i < THREAD_COUNT; i++) {
       pool.execute(new InitialVMInventoryProducer(projects, initialVMInventoryQueue));
@@ -60,7 +62,7 @@ public class InitialVMInventory {
 
     pool.shutdown();
 
-    // While the producers are still running and the queue isnt empty, take objects from the queue and write to BQ
+    // While the producers are still running and the initialVMInventoryQueue isnt empty, take objects from the queue and write to BQ
     while (!pool.isTerminated() || !initialVMInventoryQueue.isEmpty()) {
       JobStatistics statistics = null;
 

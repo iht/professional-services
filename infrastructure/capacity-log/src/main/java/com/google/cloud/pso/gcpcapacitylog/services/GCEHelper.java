@@ -22,13 +22,10 @@ import com.google.api.services.cloudresourcemanager.model.ListProjectsResponse;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Instances;
-import com.google.api.services.compute.Compute.MachineTypes.AggregatedList;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.InstanceList;
 import com.google.api.services.compute.model.MachineType;
-import com.google.api.services.compute.model.MachineTypeAggregatedList;
 import com.google.api.services.compute.model.MachineTypeList;
-import com.google.api.services.compute.model.MachineTypesScopedList;
 import com.google.api.services.compute.model.Zone;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
@@ -108,7 +105,11 @@ public class GCEHelper {
 			  } while (response.getNextPageToken() != null);
 		  }
 	  } catch (GoogleJsonResponseException e) {
-		  if (e.getStatusCode() == 403) {
+      if (e.getStatusCode() == 404) {
+        // Project is pending delete
+        logger.atFiner().log("Project " + project.getProjectId() + " does not exist. Ignoring"
+            + " project.");
+      } else if (e.getStatusCode() == 403) {
 			  logger.atFine().log("GCE API not activated for project: " + project.getProjectId() + ". Ignoring project.");
 		  } else {
 			  throw e;

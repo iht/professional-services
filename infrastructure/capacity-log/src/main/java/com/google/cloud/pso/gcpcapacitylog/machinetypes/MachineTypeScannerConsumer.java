@@ -20,8 +20,9 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.api.services.compute.model.MachineType;
 import com.google.cloud.pso.gcpcapacitylog.services.GCEHelper;
 import com.google.common.flogger.FluentLogger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 public class MachineTypeScannerConsumer implements Runnable {
@@ -29,6 +30,10 @@ public class MachineTypeScannerConsumer implements Runnable {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
   private BlockingQueue<Project> queue;
   private HashSet<Object> machineTypeRows;
+
+  // Retry logic
+  private ArrayList<Project> retries = new ArrayList<>();
+  private static final int MAX_RETRIES = 3;
 
   public MachineTypeScannerConsumer(BlockingQueue<Project> queue, HashSet<Object> machineTypeRows) {
     this.queue = queue;
@@ -41,14 +46,22 @@ public class MachineTypeScannerConsumer implements Runnable {
     while (!queue.isEmpty()) {
       project = queue.poll();
 
+      ArrayList batch = new ArrayList();
       logger.atInfo().log("Processing machine types for project: " + project.getProjectId() + ". (" + queue.size() + " projects remaining)");
       try {
         for (MachineType machineType : GCEHelper.getMachineTypesForProject(project)) {
-          machineTypeRows.add(convertToBQRow(machineType));
+          batch.add(convertToBQRow(machineType));
         }
+        machineTypeRows.addAll(batch);
       } catch (Exception e) {
-        logger.atSevere().log("Error while processing project: " + project.getProjectId() + " Putting project back in queue.", e);
-        queue.add(project);
+        // Retry logic. If the project fails more than MAX_RETRIES ignore the project. Otherwise put it back in queue for a retry.
+        retries.add(project);
+        if(Collections.frequency(retries, project) < MAX_RETRIES) {
+          logger.atWarning().log("Error while processing project: " + project.getProjectId() + " Putting project back in queue.", e);
+          queue.add(project);
+        } else {
+          logger.atSevere().log("Error while processing project: " + project.getProjectId() + "  Ignoring project.", e);
+        }
       }
     }
   }

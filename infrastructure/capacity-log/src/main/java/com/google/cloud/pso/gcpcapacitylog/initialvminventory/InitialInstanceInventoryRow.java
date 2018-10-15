@@ -23,10 +23,11 @@ import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.common.flogger.FluentLogger;
 import com.google.gson.annotations.SerializedName;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.net.*;
 import java.util.logging.Level;
 
 public class InitialInstanceInventoryRow {

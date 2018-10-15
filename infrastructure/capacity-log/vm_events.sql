@@ -89,13 +89,9 @@ FROM (
 JOIN (
   SELECT
     DISTINCT name,
-    project_id,
-    zone,
     memory_mb,
     cpus
   FROM
     `gce_capacity_log.machine_types`) AS machine_types
 ON
   machine_types.name = instance_log.machine_type
-  AND instance_log.zone = machine_types.zone
-  AND machine_types.project_id = instance_log.project_id

@@ -19,14 +19,14 @@ package com.google.cloud.pso.gcpcapacitylog.machinetypes;
 import static com.google.cloud.pso.gcpcapacitylog.machinetypes.MachineTypeScannerConsumer.convertToBQRow;
 import static junit.framework.TestCase.assertEquals;
 
+import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.api.services.compute.model.MachineType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
-import com.google.api.services.cloudresourcemanager.model.Project;
-import com.google.api.services.compute.model.MachineType;
 
 public class MachineTypesTest {
 

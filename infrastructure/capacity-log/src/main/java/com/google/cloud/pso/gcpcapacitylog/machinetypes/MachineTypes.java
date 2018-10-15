@@ -24,16 +24,10 @@ import com.google.cloud.pso.gcpcapacitylog.services.GCEHelper;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class MachineTypes {
@@ -55,6 +49,9 @@ public class MachineTypes {
     BlockingQueue<Project> projects = GCEHelper.getProjectsForOrg(orgNumber);
 	  HashSet<Object> machineTypeRows = new HashSet<>();
 
+    // Run THREAD_COUNT number of threads that traverse the org one project at a time
+    // The consumers pop one project from the queue and find all machine types for that project
+    // All machine types get added to machineTypeRows
     ExecutorService pool = Executors.newFixedThreadPool(THREAD_COUNT);
     for(int i = 0; i < THREAD_COUNT; i++) {
       pool.execute(new MachineTypeScannerConsumer(projects, machineTypeRows));
@@ -64,7 +61,7 @@ public class MachineTypes {
     // Wait for 24 hours maximum until forceful termination of thread-pool.
     pool.awaitTermination(60*24, TimeUnit.MINUTES);
 
-    //Save the data in BQ
+    // Save the data (machineTypeRows) in BQ
 	  try {
 		  BQHelper.deleteTable(projectId, dataset, tableName);
       logger.atInfo().log("Writing " + machineTypeRows.size() + " rows to BigQuery");

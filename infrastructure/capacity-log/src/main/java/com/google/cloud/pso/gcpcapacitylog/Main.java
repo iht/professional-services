@@ -16,10 +16,8 @@
 
 package com.google.cloud.pso.gcpcapacitylog;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.pso.gcpcapacitylog.initialvminventory.InitialVMInventory;
 import com.google.cloud.pso.gcpcapacitylog.machinetypes.MachineTypes;
-import com.google.cloud.storage.StorageOptions;
 import com.google.common.flogger.FluentLogger;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
