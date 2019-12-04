@@ -1,0 +1,23 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# ignore idea
+.idea
+logs
+out
+
+# ignore IntelliJ modules
+*.iml
+
+# ignore compilation output
+target/
+
+# ignore bak files
+*~
+*\#
+
+# ignore scratchpad file
+scratchpad
