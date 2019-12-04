@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.util.Optional;
+
 @AutoValue
-@JsonDeserialize(builder = AutoValue_TaxiRidePoint.class)
+@JsonDeserialize(builder = AutoValue_TaxiRidePoint.Builder.class)
 public abstract class TaxiRidePoint {
   /**
    * This is a data class for the objects that are read by the pipeline.
@@ -15,37 +17,67 @@ public abstract class TaxiRidePoint {
    *
    * <p>The data is encoded in JSON in PubSub, and here we include some annotations to map the JSON
    * field names to Java-style variable names.
+   *
+   * <p>To parse from JSON to a class, we need a Builder inner class (in addition to the value
+   * class).
    */
-  public static AutoValue.Builder newBuilder() {
+
+  /** Builder pattern */
+  public static Builder builder() {
     return new AutoValue_TaxiRidePoint.Builder();
   }
 
-  @JsonProperty("ride_id")
-  public abstract String rideId();
+  /**
+   * Properties
+   *
+   * <p>We don't annotate the value class properties, because we are not going to convert this class
+   * to JSON.
+   */
+  public abstract Optional<String> rideId();
 
-  /*
-  @SerializedName("ride_id")
-  @Nullable
-  private String rideId;
+  public abstract Optional<String> pointIdx();
 
-  @SerializedName("point_idx")
-  @Nullable
-  private int pointIdx;
+  public abstract Optional<Double> latitude();
 
-  @Nullable private double latitude;
-  @Nullable private double longitude;
-  @Nullable private String timestamp;
+  public abstract Optional<Double> longitude();
 
-  @SerializedName("meter_reading")
-  @Nullable
-  private double meterReading;
+  public abstract Optional<String> timestamp();
 
-  @SerializedName("meter_increment")
-  @Nullable
-  private double meterIncrement;
+  public abstract Optional<Double> meterReading();
 
-  @SerializedName("passenger_count")
-  @Nullable
-  private int paxCount;
-       */
+  public abstract Optional<Double> meterIncrement();
+
+  public abstract Optional<Integer> paxCount();
+
+  @AutoValue.Builder
+  public abstract static class Builder {
+    /** Builder class */
+    @JsonProperty("ride_id")
+    public abstract Builder rideId(Optional<String> s);
+
+    /**
+     * Builder methods for all the properties
+     *
+     * <p>We need to annotate the properties if the name is different to the one in the parsed JSON.
+     */
+    @JsonProperty("point_idx")
+    public abstract Builder pointIdx(Optional<String> s);
+
+    public abstract Builder latitude(Optional<Double> d);
+
+    public abstract Builder longitude(Optional<Double> d);
+
+    public abstract Builder timestamp(Optional<String> s);
+
+    @JsonProperty("meter_reading")
+    public abstract Builder meterReading(Optional<Double> d);
+
+    @JsonProperty("meter_increment")
+    public abstract Builder meterIncrement(Optional<Double> d);
+
+    @JsonProperty("passenger_count")
+    public abstract Builder paxCount(Optional<Integer> i);
+
+    public abstract TaxiRidePoint build();
+  }
 }
