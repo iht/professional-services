@@ -6,6 +6,7 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.extensions.jackson.ParseJsons;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
+import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.Validation;
 import org.apache.beam.sdk.transforms.MapElements;
@@ -50,6 +51,7 @@ public class ExampleStreamingPipeline {
     public String getTopic();
 
     @Validation.Required
+    @Description("The topic for the input data (must be in JSON format)")
     public void setTopic(String s);
 
 //    public String getBigQueryDataset();
